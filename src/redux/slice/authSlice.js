@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { auth } from '../../firebase';
-import { createUserWithEmailAndPassword, updateProfile, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 
 
 const initialState = {
@@ -15,7 +15,7 @@ const initialState = {
 
 export const registerUser = createAsyncThunk(
     'user-authentication/registerUser',
-    async ({ firstName, lastName, email, password }, {rejectWithValue}) => {
+    async ({ firstName, lastName, email, password }, { rejectWithValue }) => {
         try {
             const userCredentials = await createUserWithEmailAndPassword(auth, email, password)
             await updateProfile(userCredentials.user, {
@@ -33,7 +33,7 @@ export const registerUser = createAsyncThunk(
 
 export const loginUser = createAsyncThunk(
     "user-authentication",
-    async({email, password}, {rejectWithValue}) => {
+    async ({ email, password }, { rejectWithValue }) => {
         try {
             const userCredentials = await signInWithEmailAndPassword(auth, email, password)
             return {
@@ -45,6 +45,31 @@ export const loginUser = createAsyncThunk(
         }
     }
 )
+
+export const logoutUser = createAsyncThunk(
+    "authSlice/logoutUser",
+    async (_, { rejectWithValue }) => {
+        console.log("Inside Logout");
+        try {
+            await signOut(auth)
+        } catch (error) {
+            return rejectWithValue(error.message)
+        }
+    }
+)
+
+export const checkUserSession = createAsyncThunk(
+    "authSlice/checkUserSession",
+    async(_, {rejectWithValue}) => {
+        return new Promise((resolve) => {
+            onAuthStateChanged(auth, (user) => {
+                resolve(user)
+            })
+        })
+    }
+)
+
+
 
 const authSlice = createSlice(
     {
@@ -76,16 +101,29 @@ const authSlice = createSlice(
                 })
                 .addCase(loginUser.fulfilled, (state, action) => {
                     state.isLoading = false,
-                    state.user.userName = action.payload.displayName,
-                    state.user.email = action.payload.email
+                        state.user.userName = action.payload.displayName,
+                        state.user.email = action.payload.email
                 })
                 .addCase(loginUser.rejected, (state, action) => {
                     state.isLoading = false;
                     state.error = action.payload
                 })
+                .addCase(logoutUser.pending, (state) => {
+                    state.isLoading = true;
+                    state.error = null
+                })
+                .addCase(logoutUser.fulfilled, (state) => {
+                    state.isLoading = false;
+                    state.user.userName = null;
+                    state.user.email = null;
+                })
+                .addCase(checkUserSession.fulfilled, (state, action) => {
+                    state.user.userName = action.payload.displayName
+                    state.user.email = action.payload.email
+                })
         }
     }
 )
 
-export const {setError} = authSlice.actions
+export const { setError } = authSlice.actions
 export default authSlice.reducer;

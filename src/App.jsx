@@ -1,12 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { ResetPassword } from "./pages/ResetPassword";
+import { useDispatch, useSelector } from "react-redux";
+import { checkUserSession } from "./redux/slice/authSlice";
 
 function App() {
+  const dispatch = useDispatch()
+  const {user} = useSelector(state => state.auth)
+
+  useEffect(() => {
+    dispatch(checkUserSession())
+  }, [dispatch])
+
+  console.log("App User", user)
+
+
   return (
     <>
       <Routes>
