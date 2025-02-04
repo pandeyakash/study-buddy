@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { auth } from "../../firebase";
 import { registerUser, setError} from "../../redux/slice/authSlice";
 import { useSelector, useDispatch } from "react-redux";
@@ -27,6 +27,12 @@ export const Register = () => {
   
   const dispatch = useDispatch()
 
+   useEffect(() => {
+      if(user.userName && user.email) {
+        navigate("/")
+      }
+    }, [user, navigate])
+
   const handleChange = (e) => {
     const newAuthUser = {
       ...authUser,
@@ -43,7 +49,6 @@ export const Register = () => {
     } else {
       dispatch(setError(null))
       dispatch(registerUser(authUser))
-      navigate("/")
     }
   }
 

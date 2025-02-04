@@ -7,7 +7,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../../firebase";
 import { useSelector, useDispatch } from "react-redux";
@@ -29,9 +29,17 @@ export const Login = () => {
     setAuthUser(newAuthUser)
   }
 
+  useEffect(() => {
+    if(user.userName && user.email) {
+      navigate("/")
+    }
+  }, [user, navigate])
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("Before Login", user)
     dispatch(loginUser(authUser))
+    console.log("After Login", user)
   }
 
   console.log("Auth USer", authUser)
