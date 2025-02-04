@@ -10,49 +10,45 @@ import {
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useState } from "react";
 import { auth } from "../../firebase";
+import { registerUser, setError} from "../../redux/slice/authSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
 export const Register = () => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [user, setUser] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [authUser, setAuthUser] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
+  })
+  const {user, isLoading, error, isloggedIn} = useSelector(state => state.auth)
+  const navigate = useNavigate()
+  
+  const dispatch = useDispatch()
 
-  const handleRegister = async (e) => {
+  const handleChange = (e) => {
+    const newAuthUser = {
+      ...authUser,
+      [e.target.name] : e.target.value
+    } 
+    setAuthUser(newAuthUser)
+  }
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      setLoading(false);
-      return;
+    console.log("Auth USer", authUser);
+    if(authUser.password !== authUser.confirmPassword) {
+      dispatch(setError("Password did not match the confirm password!!"))
+    } else {
+      dispatch(setError(null))
+      dispatch(registerUser(authUser))
+      navigate("/")
     }
+  }
 
-    try {
-      const userCredentials = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      setUser(userCredentials.user);
-      await updateProfile(userCredentials.user, {
-        displayName: `${firstName} ${lastName}`,
-      });
-      await userCredentials.user.reload();
-      setFirstName("");
-      setLastName("");
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
-    } catch (error) {
-      setError(error.message);
-    }
-    setLoading(false);
-  };
-  console.log("User Name", user.displayName);
+  console.log("Error", error)
+  console.log("User", user)
 
   return (
     <Container
@@ -67,7 +63,7 @@ export const Register = () => {
     >
       <Box
         component="form"
-        onSubmit={handleRegister}
+        onSubmit={handleSubmit}
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -106,24 +102,26 @@ export const Register = () => {
           <TextField
             id="signup-first_name-input"
             label="First Name"
+            name= "firstName"
             type="text"
             autoComplete="current-first_name"
             fullWidth
             required
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+            value={authUser.firstName}
+            onChange={handleChange}
           />
 
           {/* Last Name */}
           <TextField
             id="signup-last_name-input"
             label="Last Name"
+            name="lastName"
             type="text"
             autoComplete="current-last_name"
             fullWidth
             required
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+            value={authUser.lastName}
+            onChange={handleChange}
           />
         </Box>
         <Box
@@ -138,36 +136,39 @@ export const Register = () => {
           <TextField
             id="signup-email-input"
             label="Email"
+            name="email"
             type="email"
             autoComplete="current-email"
             fullWidth
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={authUser.email}
+            onChange={handleChange}
           />
 
           {/* Password */}
           <TextField
             id="signup-password-input"
             label="Enter Password"
+            name="password"
             type="password"
             autoComplete="current-password"
             fullWidth
             required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={authUser.password}
+            onChange={handleChange}
           />
 
           {/* Confirm Password */}
           <TextField
             id="signup-confirm_password-input"
             label="Confirm Password"
+            name="confirmPassword"
             type="password"
             autoComplete="current-password"
             fullWidth
             required
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            value={authUser.confirmPassword}
+            onChange={handleChange}
           />
           <Button
             variant="contained"
@@ -181,7 +182,7 @@ export const Register = () => {
               fontSize: "1rem",
             }}
           >
-            {loading ? (
+            {isLoading ? (
               <CircularProgress size={24} color="inherit" />
             ) : (
               "Register"
