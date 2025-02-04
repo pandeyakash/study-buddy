@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { auth } from '../../firebase';
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, signInWithEmailAndPassword } from "firebase/auth";
 
 
 const initialState = {
     user: {
-        userName: "",
-        email: ""
+        userName: null,
+        email: null
     },
     isLoading: false,
     error: null,
@@ -15,7 +15,7 @@ const initialState = {
 
 export const registerUser = createAsyncThunk(
     'user-authentication/registerUser',
-    async ({ firstName, lastName, email, password }) => {
+    async ({ firstName, lastName, email, password }, {rejectWithValue}) => {
         try {
             const userCredentials = await createUserWithEmailAndPassword(auth, email, password)
             await updateProfile(userCredentials.user, {
@@ -26,7 +26,22 @@ export const registerUser = createAsyncThunk(
                 email: userCredentials.user.email
             }
         } catch (error) {
-            return error
+            return rejectWithValue(error.message)
+        }
+    }
+)
+
+export const loginUser = createAsyncThunk(
+    "user-authentication",
+    async({email, password}, {rejectWithValue}) => {
+        try {
+            const userCredentials = await signInWithEmailAndPassword(auth, email, password)
+            return {
+                displayName: userCredentials.user.displayName,
+                email: userCredentials.user.email
+            }
+        } catch (error) {
+            return rejectWithValue(error.message)
         }
     }
 )
@@ -52,6 +67,19 @@ const authSlice = createSlice(
                     state.user.email = action.payload.email;
                 })
                 .addCase(registerUser.rejected, (state, action) => {
+                    state.isLoading = false;
+                    state.error = action.payload
+                })
+                .addCase(loginUser.pending, (state) => {
+                    state.isLoading = true
+                    state.error = null
+                })
+                .addCase(loginUser.fulfilled, (state, action) => {
+                    state.isLoading = false,
+                    state.user.userName = action.payload.displayName,
+                    state.user.email = action.payload.email
+                })
+                .addCase(loginUser.rejected, (state, action) => {
                     state.isLoading = false;
                     state.error = action.payload
                 })

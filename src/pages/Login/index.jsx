@@ -7,29 +7,36 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../../firebase";
+import { useSelector, useDispatch } from "react-redux";
+import { loginUser } from "../../redux/slice/authSlice";
 export const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [authUser, setAuthUser] = useState({
+    email: "",
+    password: ""
+  })
+  const {user, isLoading, error, isLoggedIn} = useSelector(state => state.auth)
   const navigate = useNavigate();
+  const dispatch = useDispatch()
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/"); // Redirect to the home page
-    } catch (err) {
-      setError(err.message);
+  const handleChange = (e) => {
+    const newAuthUser = {
+      ...authUser,
+      [e.target.name]: e.target.value
     }
-    setLoading(false);
-  };
+    setAuthUser(newAuthUser)
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(loginUser(authUser))
+  }
+
+  console.log("Auth USer", authUser)
+  console.log("USer", user)
+ 
   return (
     <Container
       maxWidth="sm"
@@ -44,7 +51,7 @@ export const Login = () => {
     >
       <Box
         component="form"
-        onSubmit={handleLogin}
+        onSubmit={handleSubmit}
         sx={{
           display: "flex",
           flexDirection: "column",
@@ -75,22 +82,24 @@ export const Login = () => {
         <TextField
           id="login-email-input"
           label="Email"
+          name="email"
           type="email"
           autoComplete="current-email"
           fullWidth
           required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={authUser.email}
+          onChange={handleChange}
         />
         <TextField
           id="login-password-input"
           label="Password"
+          name="password"
           type="password"
           autoComplete="current-password"
           fullWidth
           required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={authUser.password}
+          onChange={handleChange}
         />
         <Button
           variant="contained"
@@ -104,7 +113,7 @@ export const Login = () => {
             fontSize: "1rem",
           }}
         >
-          {loading ? <CircularProgress size={24} color="inherit" /> : "Login"}
+          {isLoading ? <CircularProgress size={24} color="inherit" /> : "Login"}
         </Button>
         <Typography
           textAlign="center"
