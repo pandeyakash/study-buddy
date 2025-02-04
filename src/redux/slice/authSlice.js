@@ -60,7 +60,7 @@ export const logoutUser = createAsyncThunk(
 
 export const checkUserSession = createAsyncThunk(
     "authSlice/checkUserSession",
-    async(_, {rejectWithValue}) => {
+    async (_, { rejectWithValue }) => {
         return new Promise((resolve) => {
             onAuthStateChanged(auth, (user) => {
                 resolve(user)
@@ -71,7 +71,7 @@ export const checkUserSession = createAsyncThunk(
 
 export const resetUserPassword = createAsyncThunk(
     "authSlice/resetUserPassword",
-    async(email, {rejectWithValue}) => {
+    async (email, { rejectWithValue }) => {
         try {
             await sendPasswordResetEmail(auth, email)
             console.log("Email sent")
@@ -131,8 +131,10 @@ const authSlice = createSlice(
                     state.user.email = null;
                 })
                 .addCase(checkUserSession.fulfilled, (state, action) => {
-                    state.user.userName = action.payload.displayName
-                    state.user.email = action.payload.email
+                    if (action.payload) {
+                        state.user.userName = action.payload.displayName
+                        state.user.email = action.payload.email
+                    }
                 })
                 .addCase(resetUserPassword.pending, (state) => {
                     state.isLoading = true;
