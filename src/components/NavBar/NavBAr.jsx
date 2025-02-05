@@ -13,6 +13,8 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { logoutUser } from '../../redux/slice/authSlice';
 
 const pages = [
     {title:'Home', path: "/"},
@@ -23,6 +25,9 @@ const pages = [
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 export const NavBar = () => {
+    const {isLoggedIn} = useSelector(state => state.auth)
+    const dispatch = useDispatch()
+
     const [anchorElNav, setAnchorElNav] = React.useState(null);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
     const navigate = useNavigate()
@@ -171,7 +176,9 @@ export const NavBar = () => {
                     <Box sx={{
                         display: "flex"
                     }}>
-                        <Button variant='contained' sx={{
+                        {!isLoggedIn && (
+                            <Box>
+                                <Button variant='contained' sx={{
                             backgroundColor: "#48cae4",
                             color: "black",
                             fontWeight: 700,
@@ -201,6 +208,8 @@ export const NavBar = () => {
                         >
                             Login
                         </Button>
+                            </Box>
+                        )}
                     <Box sx={{
                         // flexGrow: 1,
                         display: "flex",
@@ -227,11 +236,20 @@ export const NavBar = () => {
                             open={Boolean(anchorElUser)}
                             onClose={handleCloseUserMenu}
                         >
-                            {settings.map((setting) => (
-                                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                                    <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
-                                </MenuItem>
-                            ))}
+                            {settings.map((setting) => {
+                                if(setting !== "Logout" || isLoggedIn) {
+                                    return (
+                                        <MenuItem key={setting} onClick={() => {
+                                            if(isLoggedIn) {
+                                                dispatch(logoutUser())
+                                            }
+                                            handleCloseUserMenu()
+                                            }}>
+                                            <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
+                                        </MenuItem>
+                                    )
+                                }
+                            })}
                         </Menu>
                     </Box>
                     </Box>

@@ -98,11 +98,13 @@ const authSlice = createSlice(
                 .addCase(registerUser.pending, (state) => {
                     state.isLoading = true,
                         state.error = null;
+                        state.isLoggedIn = false
                 })
                 .addCase(registerUser.fulfilled, (state, action) => {
                     state.isLoading = false;
                     state.user.userName = action.payload.displayName;
                     state.user.email = action.payload.email;
+                    state.isLoggedIn = true
                 })
                 .addCase(registerUser.rejected, (state, action) => {
                     state.isLoading = false;
@@ -111,11 +113,13 @@ const authSlice = createSlice(
                 .addCase(loginUser.pending, (state) => {
                     state.isLoading = true
                     state.error = null
+                    state.isLoggedIn = false
                 })
                 .addCase(loginUser.fulfilled, (state, action) => {
                     state.isLoading = false,
                         state.user.userName = action.payload.displayName,
                         state.user.email = action.payload.email
+                        state.isLoggedIn = true
                 })
                 .addCase(loginUser.rejected, (state, action) => {
                     state.isLoading = false;
@@ -124,16 +128,19 @@ const authSlice = createSlice(
                 .addCase(logoutUser.pending, (state) => {
                     state.isLoading = true;
                     state.error = null
+                    state.isLoggedIn = true
                 })
                 .addCase(logoutUser.fulfilled, (state) => {
                     state.isLoading = false;
                     state.user.userName = null;
                     state.user.email = null;
+                    state.isLoggedIn = false
                 })
                 .addCase(checkUserSession.fulfilled, (state, action) => {
                     if (action.payload) {
                         state.user.userName = action.payload.displayName
                         state.user.email = action.payload.email
+                        state.isLoggedIn = true
                     }
                 })
                 .addCase(resetUserPassword.pending, (state) => {
