@@ -146,7 +146,7 @@ export const NavBar = () => {
                             display: { xs: 'none', md: 'flex' },
                             justifyContent: "space-between",
                             alignItems: "center",
-                            paddingX: "9px",
+                            paddingX: "12px",
                             borderRadius: 1000,
                             backgroundColor: "white"
                         }}>
