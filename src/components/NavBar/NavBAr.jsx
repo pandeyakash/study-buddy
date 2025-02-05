@@ -12,20 +12,26 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '../../redux/slice/authSlice';
+import { Drawer, List, ListItem, useMediaQuery } from '@mui/material';
+import logo from "../../assets/sb.png"
+import HomeIcon from '@mui/icons-material/Home';
+import ListAltIcon from '@mui/icons-material/ListAlt';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import TimerIcon from '@mui/icons-material/Timer';
 
 const pages = [
-    {title:'Home', path: "/"},
-    {title: 'Tasks', path: "/tasks"},
-    {title: 'Calendar', path: "/calender"},
-    {title: "Pomodoro", path: "/pomodoro"}
+    { title: 'Home', path: "/", icon: <HomeIcon sx={{mr: "2px", fontSize: 20}}/> },
+    { title: 'Tasks', path: "/tasks", icon: <ListAltIcon sx={{mr: "2px", fontSize: 20}}/>},
+    { title: 'Calendar', path: "/calendar", icon: <CalendarMonthIcon sx={{mr: "2px", fontSize: 20}}/> },
+    { title: "Pomodoro", path: "/pomodoro", icon: <TimerIcon sx={{mr: "2px", fontSize: 20}}/>}
 ];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+const settings = ['Profile', 'Account', 'Logout'];
 
 export const NavBar = () => {
-    const {isLoggedIn} = useSelector(state => state.auth)
+    const { user, isLoggedIn } = useSelector(state => state.auth)
     const dispatch = useDispatch()
 
     const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -53,29 +59,16 @@ export const NavBar = () => {
         }}>
             <Container maxWidth={"100%"}>
                 <Toolbar disableGutters sx={{
-                    py: 1, 
+                    py: 1,
                     width: "100%",
                     display: "flex",
                     justifyContent: "space-between"
                 }}>
-                    <Typography
-                        variant="h6"
-                        noWrap
-                        component="a"
-                        href="#app-bar-with-responsive-menu"
-                        sx={{
-                            mr: 2,
-                            display: { xs: 'none', md: 'flex' },
-                            fontFamily: 'monospace',
-                            fontWeight: 700,
-                            color: 'inherit',
-                            textDecoration: 'none',
-                        }}
-                    >
-                        Study Buddy
-                    </Typography>
+                    <IconButton component={Link} to="/" sx={{display: { xs: 'none', md: 'flex' },}}>
+                    <img src={logo} alt="My Website Logo" style={{ height: '50px' }} />
+                    </IconButton>
 
-                    <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+                    <Box sx={{display: { xs: 'flex', md: 'none' } }}>
                         <IconButton
                             size="large"
                             aria-label="account of current user"
@@ -86,13 +79,9 @@ export const NavBar = () => {
                         >
                             <MenuIcon />
                         </IconButton>
-                        <Menu
+                        <Drawer
                             id="menu-appbar"
                             anchorEl={anchorElNav}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'left',
-                            }}
                             keepMounted
                             transformOrigin={{
                                 vertical: 'top',
@@ -102,156 +91,182 @@ export const NavBar = () => {
                             onClose={handleCloseNavMenu}
                             sx={{ display: { xs: 'block', md: 'none' } }}
                         >
+                            <Box sx={{
+                                width: 150,
+                                height: "100vh",
+                                backgroundColor: "#023e8a"
+                            }}>
+                            <List>
                             {pages.map((page) => (
-                                <MenuItem key={page.title} onClick={handleCloseNavMenu}>
-                                    <Typography sx={{ textAlign: 'center' }}>{page.title}</Typography>
-                                </MenuItem>
-                            ))}
-                        </Menu>
-                    </Box>
-                    <Typography
-                        variant="h5"
-                        noWrap
-                        component="a"
-                        href="#app-bar-with-responsive-menu"
-                        sx={{
-                            mr: 2,
-                            display: { xs: 'flex', md: 'none' },
-                            flexGrow: 1,
-                            fontFamily: 'monospace',
-                            fontWeight: 700,
-                            color: 'inherit',
-                            textDecoration: 'none',
-                        }}
-                    >
-                        Study Buddy
-                    </Typography>
-                    <Box sx={{
-                        minWidth: {lg: 800, xl: 1000},
-                        display: "flex",
-                        justifyContent: "flex-start"
-                    }}>
-                    <Box sx={{
-                        // flexGrow: 1, 
-                        minWidth: 600,
-                        display: { xs: 'none', md: 'flex' },
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        paddingX: 2,
-                        borderRadius: 1000,
-                        backgroundColor: "white"
-                    }}>
-                        {pages.map((page) => (
-                            <Button
-                                key={page.title}
-                                onClick={() => {
-                                    handleCloseNavMenu
-                                    navigate(page.path)
-                                }}
-                                sx={{
-                                    my: 1,
-                                    color: 'black',
-                                    display: 'block',
-                                    fontWeight: 700,
-                                    borderRadius: 1000,
-                                    // backgroundColor: "red",
-                                    px: 4,
-                                    py: 1,
-                                    transition: '0.3s',
-                                    '&:hover': {
-                                        backgroundColor: '#ade8f4', // Color on hover
-                                        transform: 'scale(1.05)',    // Slight scaling effect
-                                    },
-                                    ...(location.pathname === page.path && {
-                                        backgroundColor: '#48cae4',
-                                        fontWeight: 'bold',
-                                    })
-                                }}
-                            >
+                                <ListItem key={page.title} onClick={handleCloseNavMenu} component={Link} to={page.path} >
+                                    <Button
+                                    key={page.title}
+                                    onClick={() => {
+                                        handleCloseNavMenu
+                                        navigate(page.path)
+                                    }}
+                                    sx={{
+                                        my: 1,
+                                        width: "100%",
+                                        textAlign: "start",
+                                        color: 'white',
+                                        display: 'flex',
+                                        alignItems: "center",
+                                        justifyContent: "flex-start",
+                                        fontWeight: 700,
+                                        px: "3px",
+                                        py: 1,
+                                        transition: '0.3s',
+                                        '&:hover': {
+                                            backgroundColor: '#caf0f8', // Color on hover
+                                            transform: 'scale(1.05)',    // Slight scaling effect
+                                        },
+                                        ...(location.pathname === page.path && {
+                                            backgroundColor: '#ade8f4',
+                                            fontWeight: 'bold',
+                                            color: "black"
+                                        })
+                                    }}
+                                >
+                                 {page.icon}
                                 {page.title}
-                            </Button>
-                        ))}
+                                </Button>
+                                </ListItem>
+                            ))}
+                            </List>
+                            </Box>
+                        </Drawer>
                     </Box>
-                    </Box>
+                    <IconButton component={Link} to="/" sx={{display: { xs: 'flex', md: 'none' }}}>
+                    <img src={logo} alt="My Website Logo" style={{ height: '40px' }} />
+                    </IconButton>
+                        <Box sx={{
+                            // flexGrow: 1, 
+                            minWidth: {md: 500, lg:600},
+                            display: { xs: 'none', md: 'flex' },
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            paddingX: "9px",
+                            borderRadius: 1000,
+                            backgroundColor: "white"
+                        }}>
+                            {pages.map((page) => (
+                                <Button
+                                    key={page.title}
+                                    onClick={() => {
+                                        handleCloseNavMenu
+                                        navigate(page.path)
+                                    }}
+                                    sx={{
+                                        my: 1,
+                                        color: 'black',
+                                        display: 'block',
+                                        fontWeight: 700,
+                                        borderRadius: 1000,
+                                        px: 4,
+                                        py: 1,
+                                        transition: '0.3s',
+                                        '&:hover': {
+                                            backgroundColor: '#caf0f8', // Color on hover
+                                            transform: 'scale(1.05)',    // Slight scaling effect
+                                        },
+                                        ...(location.pathname === page.path && {
+                                            backgroundColor: '#ade8f4',
+                                            fontWeight: 'bold',
+                                        })
+                                    }}
+                                >
+                                    {page.title}
+                                </Button>
+                            ))}
+                        </Box>
                     <Box sx={{
-                        display: "flex"
+                        display: "flex",
+                        flexDirection: {lg: "row", xl: "row"},
                     }}>
                         {!isLoggedIn && (
                             <Box>
-                                <Button variant='contained' sx={{
-                            backgroundColor: "#48cae4",
-                            color: "black",
-                            fontWeight: 700,
-                            mr: 1,
-                            transition: '0.3s',
-                            '&:hover': {
-                                backgroundColor: '#ade8f4', // Color on hover
-                                transform: 'scale(1.05)',    // Slight scaling effect
-                            },
-                        }}
-                        onClick={() => navigate("/register")}
-                        >
-                            Register
-                        </Button>
-                        <Button variant='contained' sx={{
-                            backgroundColor: "#48cae4",
-                            color: "black",
-                            fontWeight: 700,
-                            mr: 1,
-                            transition: '0.3s',
-                            '&:hover': {
-                                backgroundColor: '#ade8f4', // Color on hover
-                                transform: 'scale(1.05)',    // Slight scaling effect
-                            },
-                        }}
-                        onClick={() => navigate("/login")}
-                        >
-                            Login
-                        </Button>
+                                {location.pathname !== "/register" && (
+                                    <Button variant='contained' sx={{
+                                        backgroundColor: "#ade8f4",
+                                        color: "black",
+                                        fontWeight: 700,
+                                        mr: 1,
+                                        transition: '0.3s',
+                                        '&:hover': {
+                                            backgroundColor: '#caf0f8', // Color on hover
+                                            transform: 'scale(1.05)',    // Slight scaling effect
+                                        },
+                                    }}
+                                        onClick={() => navigate("/register")}
+                                    >
+                                        Register
+                                    </Button>
+                                )}
+                                {location.pathname !== "/login" && (
+                                    <Button variant='contained' sx={{
+                                        backgroundColor: "#ade8f4",
+                                        color: "black",
+                                        fontWeight: 700,
+                                        mr: 1,
+                                        transition: '0.3s',
+                                        '&:hover': {
+                                            backgroundColor: '#caf0f8', // Color on hover
+                                            transform: 'scale(1.05)',    // Slight scaling effect
+                                        },
+                                    }}
+                                        onClick={() => navigate("/login")}
+                                    >
+                                        Login
+                                    </Button>
+                                )}
                             </Box>
                         )}
-                    <Box sx={{
-                        // flexGrow: 1,
-                        display: "flex",
-                        justifyContent: "flex-end"
-                    }}>
-                        <Tooltip title="Open settings">
-                            <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" sx={{color: "#023e8a"}}/>
-                            </IconButton>
-                        </Tooltip>
-                        <Menu
-                            sx={{ mt: '45px' }}
-                            id="menu-appbar"
-                            anchorEl={anchorElUser}
-                            anchorOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                            keepMounted
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                            open={Boolean(anchorElUser)}
-                            onClose={handleCloseUserMenu}
-                        >
-                            {settings.map((setting) => {
-                                if(setting !== "Logout" || isLoggedIn) {
+                        <Box sx={{
+                            // flexGrow: 1,
+                            display: "flex",
+                            justifyContent: "flex-end"
+                        }}>
+                            {isLoggedIn && (
+                                <Tooltip title="Open settings">
+                                    <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                                        <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" sx={{ color: "#023e8a" }}>
+                                            {user?.userName?.charAt(0).toUpperCase() || 'U'}
+                                        </Avatar>
+                                    </IconButton>
+                                </Tooltip>
+                            )}
+                            <Menu
+                                sx={{ mt: '45px' }}
+                                id="menu-appbar"
+                                anchorEl={anchorElUser}
+                                anchorOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                keepMounted
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'right',
+                                }}
+                                open={Boolean(anchorElUser)}
+                                onClose={handleCloseUserMenu}
+                            >
+                                {settings.map((setting) => {
                                     return (
                                         <MenuItem key={setting} onClick={() => {
-                                            if(isLoggedIn) {
+                                            if (isLoggedIn) {
                                                 dispatch(logoutUser())
                                             }
                                             handleCloseUserMenu()
-                                            }}>
+                                        }}>
                                             <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
                                         </MenuItem>
                                     )
                                 }
-                            })}
-                        </Menu>
-                    </Box>
+                                )}
+                            </Menu>
+                        </Box>
                     </Box>
                 </Toolbar>
             </Container>
